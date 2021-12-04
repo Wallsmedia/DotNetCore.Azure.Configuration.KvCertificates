@@ -1,0 +1,26 @@
+﻿<Project>
+
+  <PropertyGroup>
+    <Product>Azure AspNetCore KeyVault Certificates</Product>
+    <Company>.NET Foundation</Company>
+    <Authors>Wallsmedia Ltd</Authors>
+    <Copyright>Copyright $([System.DateTime]::Now.ToString('yyyy')) © Artem &amp; Alex Paskhin. All rights reserved.</Copyright>
+    <PackageTags>Azure DotNetCore KeyVault Certificates</PackageTags>
+    <Version>6.0.0</Version>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <DotNetCoreAppVersions>net6.0</DotNetCoreAppVersions>
+    <DotNetCoreAppVersionTest>net6.0</DotNetCoreAppVersionTest>
+    <DotNetCoreVersions>netstandard2.1</DotNetCoreVersions>
+  </PropertyGroup>
+
+  <PropertyGroup>
+
+    <AzureIdentityVersion>1.5.0</AzureIdentityVersion>
+    <AzureSecurityKeyVaultSecretsVersion>4.2.0</AzureSecurityKeyVaultSecretsVersion>
+    <AzureSecurityKeyVaultCertificatesVersion>4.2.0</AzureSecurityKeyVaultCertificatesVersion>
+    <SystemLinqAsyncVersion>5.0.0</SystemLinqAsyncVersion>
+
+  </PropertyGroup>
+</Project>
