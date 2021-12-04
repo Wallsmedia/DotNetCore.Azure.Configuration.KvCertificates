@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(DotNetCoreAppVersions)</TargetFrameworks>
+    <PackageTags>DotNetCore Azure Configuration KeyVault Certificates</PackageTags>
     <Description>
       Allows to load Certificates by list and map them into new names.
       Allows to load  Certificates into the configuration section.

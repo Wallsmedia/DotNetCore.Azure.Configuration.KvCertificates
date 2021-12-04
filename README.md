@@ -1,4 +1,4 @@
-# Azure Key Vault Certificates configuration provider for Microsoft.Extensions.Configuration
+# DotNetCore Azure Configuration Key Vault Certificates
 
 The AspNetCore.Azure.Configuration.KvCertificate based on idea [DotNetCore.Azure.Configuration.KvSecrets](https://www.nuget.org/packages/DotNetCore.Azure.Configuration.KvSecrets)
 which package allows storing configuration values using Azure Key Vault Certificates.
@@ -47,7 +47,7 @@ To load initialize configuration from Azure Key Vault secrets call the `AddAzure
 ```C# 
         public static void AddKvCertificatesConfigurations(WebHostBuilderContext hostingContext, IConfigurationBuilder configurationBuilder)
         {
-            var configBuilder = new ConfigurationBuilder().AddInMemoryCollection();
+        var configBuilder = new ConfigurationBuilder().AddInMemoryCollection();
             IHostEnvironment env = hostingContext.HostingEnvironment;
             configBuilder.AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
                   .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: false);
@@ -55,52 +55,200 @@ To load initialize configuration from Azure Key Vault secrets call the `AddAzure
 
             var config = configBuilder.Build();
 
-            string KeyVaultUrl = config[nameof(KeyVaultUrl)];
-            List<string> VaultCertificates = config.GetSection(nameof(VaultCertificates)).Get<List<string>>();
-            string ConfigurationSectionPrefix = config[nameof(ConfigurationSectionPrefix)];
+            var options = configuration.GetSection(nameof(AzureKvCertificatesConfigurationOptions))
+                               .Get<AzureKvCertificatesConfigurationOptions>();
 
-            var credential = new AzureCliCredential();
-            //var credential = new DefaultAzureCredential();
-            var client = new CertificateClient(vaultUri: new Uri(KeyVaultUrl), credential);
-            var options = new AzureKvCertificatesConfigurationOptions()
-            {
-                ConfigurationSectionPrefix = ConfigurationSectionPrefix,
-                VaultCertificates = VaultCertificates
-            };
-
-            configurationBuilder.AddAzureKeyVaultCertificates(client, options);
-        }
+            var credential = new DefaultAzureCredential(
+                new DefaultAzureCredentialOptions()
+                {
+                    ExcludeSharedTokenCacheCredential = true,
+                    ExcludeVisualStudioCodeCredential = true,
+                    ExcludeVisualStudioCredential = true,
+                    ExcludeInteractiveBrowserCredential = true
+                });
+          
+            // Adds Azure Key Valt configuration provider.
+            configurationBuilder.AddAzureKeyVaultCertificates(credential, options);
 ```
 
 **appsettings.json**
 
 ```JSON
 
-  "ConfigurationSectionPrefix": "secret",
-  "KeyVaultUrl": "https://secrets128654s235.vault.azure.net/",
-  "VaultCertificates": [ "FuseEval--Certificate8", "CertificateLoadIn", "RealCertificateVault" ]
-
-```
+ "AzureKvCertificatesConfigurationOptions": {
+    "ConfigurationSectionPrefix": "certificates",
+    "VaultUri": "https://mps-Development-microsevices.vault.azure.net/",
+    "VaultCertificates": [
+      "Development-jwt-microservices"
+    ]
+  }
+  
+  ```
 
 The [Azure Identity library][identity] provides easy Azure Active Directory support for authentication.
 
-## Next steps
-
 Read more about [configuration in ASP.NET Core][aspnetcore_configuration_doc].
 
-## Contributing
 
-This project welcomes contributions and suggestions.  Most contributions require
-you to agree to a Contributor License Agreement (CLA) declaring that you have
-the right to, and actually do, grant us the rights to use your contribution. For
-details, visit [cla.microsoft.com][cla].
+## Example with DotNetCore Configuration Templates
 
-This project has adopted the [Microsoft Open Source Code of Conduct][coc].
-For more information see the [Code of Conduct FAQ][coc_faq]
-or contact [opencode@microsoft.com][coc_contact] with any
-additional questions or comments.
 
-![Impressions](https://azure-sdk-impressions.azurewebsites.net/api/impressions/azure-sdk-for-net%2Fsdk%2Fextensions%2FAzure.Extensions.AspNetCore.Configuration.Secrets%2FREADME.png)
+Use [DotNetCore Configuration Templates](https://github.com/Wallsmedia/DotNetCore.Configuration.Formatter) 
+to inject secrets into Microservice configuration.
+
+Add to project nuget package [DotNetCore.Azure.Configuration.KvSecrets](https://www.nuget.org/packages/DotNetCore.Azure.Configuration.KvSecrets).
+
+Add to project nuget package [DotNetCore.Configuration.Formatter](https://www.nuget.org/packages/DotNetCore.Configuration.Formatter/).
+
+
+
+##### Environment Variables set to :
+
+```
+DOTNET_RUNNING_IN_CONTAINER=true
+ASPNETCORE_ENVIRONMENT=Development
+...
+host_environmet=datacenter
+```
+
+
+##### Microservice has the ApplicationConfiguration.cs
+
+``` CSharp
+
+public class ApplicationConfiguration 
+{
+     public bool IsDocker {get; set;}
+     public string RunLocation {get; set;}
+     public string AppEnvironment {get; set;}
+     public string BusConnection {get; set;}
+     public string DbUser {get; set;}
+     public string DbPassword {get; set;}
+}
+```
+
+##### Microservice has the following appsettings.json:
+
+``` JSON 
+{
+"AzureKvConfigurationOptions": {
+  "ConfigurationSectionPrefix": "secret",
+  "VaultUri": "https://secrets128654s235.vault.azure.net/",
+  "VaultSecrets": [ 
+    "service-bus-Development-connection",
+    "sql-Development-password",
+    "sql-Development-user",
+    "service-bus-Production-connection",
+    "sql-Production-password",
+    "sql-Production-user" ]
+    },
+
+ "AzureKvCertificatesConfigurationOptions": {
+    "ConfigurationSectionPrefix": "certificates",
+    "VaultUri": "https://mps-Development-microsevices.vault.azure.net/",
+    "VaultCertificates": [
+      "Development-jwt-microservices"
+    ]
+  }
+
+  ApplicationConfiguration:{
+     "IsDocker": "{DOTNET_RUNNING_IN_CONTAINER??false}",
+     "RunLocation":"{host_environmet??local}",
+     "AppEnvironment":"{ENVIRONMENT}",
+     "BusConnection":"{secret:service-bus-{ENVIRONMENT}-connection}",
+     "DbPassword":"{secret:sql-{ENVIRONMENT}-password}",
+     "DbUser":"{secret:sql-{ENVIRONMENT}-user}",
+     "JwtCertificate": "{certificates:{ENVIRONMENT}-jwt-microservices}"
+  }
+}
+```
+
+##### Microservice the Startup.cs
+
+
+``` CSharp
+
+     var applicationConfig = Configuration.UseFormater()
+     .GetSection(nameof(ApplicationConfiguration))
+     .Get<ApplicationConfiguration>();
+  ```
+ 
+
+##### Microservice has the ApplicationConfiguration.cs
+
+``` CSharp
+
+public class ApplicationConfiguration 
+{
+     public bool IsDocker {get; set;}
+     public string RunLocation {get; set;}
+     public string AppEnvironment {get; set;}
+     public string BusConnection {get; set;}
+     public string DbUser {get; set;}
+     public string DbPassword {get; set;}
+     public KvCertificateConfigContainer JwtCertificate { get; set; }
+}
+```
+
+
+**Program.cs**
+
+```C# 
+    public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.ConfigureAppConfiguration(Startup.AddKvCertificatesConfigurations);
+                    webBuilder.UseStartup<Startup>();
+                });
+```
+
+**Startup.cs**
+
+```C# 
+        public static void AddKvCertificatesConfigurations(WebHostBuilderContext hostingContext, IConfigurationBuilder configurationBuilder)
+        {
+        var configBuilder = new ConfigurationBuilder().AddInMemoryCollection();
+            IHostEnvironment env = hostingContext.HostingEnvironment;
+            configBuilder.AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
+                  .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: false);
+            configBuilder.AddEnvironmentVariables();
+
+            var config = configBuilder.Build();
+
+            var options = configuration.GetSection(nameof(AzureKvCertificatesConfigurationOptions))
+                               .Get<AzureKvCertificatesConfigurationOptions>();
+
+            var credential = new DefaultAzureCredential(
+                new DefaultAzureCredentialOptions()
+                {
+                    ExcludeSharedTokenCacheCredential = true,
+                    ExcludeVisualStudioCodeCredential = true,
+                    ExcludeVisualStudioCredential = true,
+                    ExcludeInteractiveBrowserCredential = true
+                });
+          
+            // Adds Azure Key Valt configuration provider.
+            configurationBuilder.AddAzureKeyVaultCertificates(credential, options);
+
+           var optionsSecrets = configuration.GetSection(nameof(AzureKvConfigurationOptions))
+                               .Get<AzureKvConfigurationOptions>();
+           
+           // Adds Azure Key Valt configuration provider.
+            configurationBuilder.AddAzureKeyVault(credential, options);
+           
+
+```
+
+
+or with **shorthand** 
+
+``` CSharp
+
+     var applicationConfig = Configuration.GetTypeNameFormatted<ApplicationConfiguration>();
+
+```
+
 
 <!-- LINKS -->
 [azure_cli]: https://docs.microsoft.com/cli/azure

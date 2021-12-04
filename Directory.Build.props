@@ -6,7 +6,7 @@
     <Authors>Wallsmedia Ltd</Authors>
     <Copyright>Copyright $([System.DateTime]::Now.ToString('yyyy')) © Artem &amp; Alex Paskhin. All rights reserved.</Copyright>
     <PackageTags>Azure DotNetCore KeyVault Certificates</PackageTags>
-    <Version>6.0.0</Version>
+    <Version>6.0.2</Version>
   </PropertyGroup>
   
   <PropertyGroup>
