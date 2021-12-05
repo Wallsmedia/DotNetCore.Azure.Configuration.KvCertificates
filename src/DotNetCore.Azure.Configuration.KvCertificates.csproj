@@ -11,6 +11,8 @@
     <PackageProjectUrl>https://github.com/Wallsmedia/DotNetCore.Azure.Configuration.Certificates</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Wallsmedia/DotNetCore.Azure.Configuration.Certificates.git</RepositoryUrl>
     <RepositoryType>github</RepositoryType>
+    <AssemblyOriginatorKeyFile>..\build\Key.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>True</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(DisableImplicitFrameworkReferences)' != 'true' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' &gt;= '3.0'">
@@ -29,8 +31,6 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageOutputPath>../.nupkgs</PackageOutputPath>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <AssemblyOriginatorKeyFile>..\build\Key.snk</AssemblyOriginatorKeyFile>
-    <SignAssembly>True</SignAssembly>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
   </PropertyGroup>

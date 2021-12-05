@@ -76,7 +76,7 @@ namespace DotNetCore.Azure.Configuration.KvCerfificates.Tests
             var client = new CertificateClient(vaultUri: new Uri(KeyVaultUrl), credential);
             var secretClient = new SecretClient(vaultUri: new Uri(KeyVaultUrl), credential);
 
-            
+
             // Act
 
             Pageable<CertificateProperties> certificateProperties = client.GetPropertiesOfCertificateVersions(name);
@@ -153,7 +153,7 @@ namespace DotNetCore.Azure.Configuration.KvCerfificates.Tests
             return tokenString;
         }
 
-        static ClaimsPrincipal ValidateTokenWithX509SecurityToken(X509Certificate2 signingCert, string token)
+        public static (ClaimsPrincipal, JwtSecurityToken) ValidateTokenWithX509SecurityToken(X509Certificate2 signingCert, string token)
         {
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
             JwtSecurityToken jwtToken = tokenHandler.ReadJwtToken(token);
@@ -171,18 +171,18 @@ namespace DotNetCore.Azure.Configuration.KvCerfificates.Tests
 
             try
             {
-                var claims = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
-                if (claims != null && validatedToken != null)
+                var claimsPrincipal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
+                if (claimsPrincipal != null && validatedToken != null)
                 {
-                    return claims;
+                    return (claimsPrincipal, validatedToken as JwtSecurityToken);
                 }
             }
             catch { }
 
-            return null;
+            return (null, null);
         }
 
-     
+
 
     }
 }
