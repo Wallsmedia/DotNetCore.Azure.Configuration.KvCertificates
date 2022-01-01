@@ -14,7 +14,7 @@ which package allows storing configuration values using Azure Key Vault Certific
 
 Install the package with [DotNetCore.Azure.Configuration.KvCertificates](https://www.nuget.org/packages/DotNetCore.Azure.Configuration.KvCertificates):
 
-**Version 6.x.x** : **supports only **Microsoft.AspNetCore.App** 6.0-***
+**Version 6.0.x** : **supports only **Microsoft.AspNetCore.App** 6.0 5.0 3.1-***
 
 
 ```Powershell

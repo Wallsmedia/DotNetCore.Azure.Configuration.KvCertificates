@@ -1,7 +1,7 @@
 ﻿//   \\      /\  /\\
 //  o \\ \  //\\// \\
 //  |  \//\//       \\
-// Copyright (c) i-Wallsmedia 2021 Alex & Artem Paskhin All rights reserved.
+// Copyright (c) i-Wallsmedia 2022 Alex & Artem Paskhin All rights reserved.
 
 // Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
@@ -24,7 +24,6 @@ namespace DotNetCore.Azure.Configuration.KvCertificates
     [TypeConverter(typeof(KvCertificateConfigContainerConverter))]
     public class KvCertificateConfigContainer
     {
-        [JsonIgnore]
         private X509Certificate2 _x509Certificate2;
 
         [JsonIgnore]
