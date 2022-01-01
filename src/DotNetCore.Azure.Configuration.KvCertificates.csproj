@@ -8,8 +8,8 @@
       Allows to load  Certificates into the configuration section.
     </Description>
     <PackageReleaseNotes>Only supports the .net 6.0.</PackageReleaseNotes>
-    <PackageProjectUrl>https://github.com/Wallsmedia/DotNetCore.Azure.Configuration.Certificates</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/Wallsmedia/DotNetCore.Azure.Configuration.Certificates.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Wallsmedia/DotNetCore.Azure.Configuration.KvCertificates</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Wallsmedia/DotNetCore.Azure.Configuration.KvCertificates.git</RepositoryUrl>
     <RepositoryType>github</RepositoryType>
     <AssemblyOriginatorKeyFile>..\build\Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>True</SignAssembly>
