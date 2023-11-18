@@ -14,7 +14,7 @@ which package allows storing configuration values using Azure Key Vault Certific
 
 Install the package with [DotNetCore.Azure.Configuration.KvCertificates](https://www.nuget.org/packages/DotNetCore.Azure.Configuration.KvCertificates):
 
-**Version 7.0.x** : **supports only **Microsoft.AspNetCore.App** 7.0
+**Version 8.0.x** : **supports only **Microsoft.AspNetCore.App** 8.0
 
 
 ```Powershell
@@ -33,42 +33,34 @@ To load initialize configuration from Azure Key Vault secrets call the `AddAzure
 **Program.cs**
 
 ```C# 
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.ConfigureAppConfiguration(Startup.AddKvCertificatesConfigurations);
-                    webBuilder.UseStartup<Startup>();
-                });
+      var builder = WebApplication.CreateBuilder(args);
+      builder.AddKeyVaultConfigurationProvider();      
 ```
 
-**Startup.cs**
+**StartupExt.cs**
+
+Used DotNetCore Configuration Templates to inject secrets into Microservice configuration.
+(Add to project nuget package DotNetCore.Configuration.Formatter.)
 
 ```C# 
-        public static void AddKvCertificatesConfigurations(WebHostBuilderContext hostingContext, IConfigurationBuilder configurationBuilder)
-        {
-        var configBuilder = new ConfigurationBuilder().AddInMemoryCollection();
-            IHostEnvironment env = hostingContext.HostingEnvironment;
-            configBuilder.AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
-                  .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: false);
-            configBuilder.AddEnvironmentVariables();
+  public static void AddKeyVaultConfigurationProvider(this WebApplicationBuilder builder)
+    {
 
-            var config = configBuilder.Build();
+        var credential = new DefaultAzureCredential(
+            new DefaultAzureCredentialOptions()
+            {
+                ExcludeSharedTokenCacheCredential = true,
+                ExcludeVisualStudioCodeCredential = true,
+                ExcludeVisualStudioCredential = true,
+                ExcludeInteractiveBrowserCredential = true
+            });
 
-            var options = configuration.GetSection(nameof(AzureKvCertificatesConfigurationOptions))
-                               .Get<AzureKvCertificatesConfigurationOptions>();
+        var optionsCert = builder.Configuration
+                           .GetTypeNameFormatted<AzureKvCertificatesConfigurationOptions>();
 
-            var credential = new DefaultAzureCredential(
-                new DefaultAzureCredentialOptions()
-                {
-                    ExcludeSharedTokenCacheCredential = true,
-                    ExcludeVisualStudioCodeCredential = true,
-                    ExcludeVisualStudioCredential = true,
-                    ExcludeInteractiveBrowserCredential = true
-                });
-          
-            // Adds Azure Key Valt configuration provider.
-            configurationBuilder.AddAzureKeyVaultCertificates(credential, options);
+        // Adds Azure Key Valt configuration provider.
+        builder.Configuration.AddAzureKeyVaultCertificates(credential, optionsCert);
+    }
 ```
 
 **appsettings.json**

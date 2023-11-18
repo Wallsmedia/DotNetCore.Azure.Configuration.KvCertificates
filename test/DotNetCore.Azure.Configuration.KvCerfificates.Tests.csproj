@@ -1,24 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>$(DotNetCoreAppVersionTest)</TargetFrameworks>
-    <ExcludeRecordingFramework>true</ExcludeRecordingFramework>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>$(DotNetCoreAppVersions)</TargetFrameworks>
+		<ExcludeRecordingFramework>true</ExcludeRecordingFramework>
+	</PropertyGroup>
 
-  <ItemGroup Condition="'$(DisableImplicitFrameworkReferences)' != 'true' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' &gt;= '3.0'">
-    <FrameworkReference Include="Microsoft.AspNetCore.App" IsImplicitlyDefined="true" />
-  </ItemGroup>
+	<ItemGroup Condition="'$(DisableImplicitFrameworkReferences)' != 'true' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' &gt;= '3.0'">
+		<FrameworkReference Include="Microsoft.AspNetCore.App" IsImplicitlyDefined="true" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="NUnit" />
-    <PackageReference Include="NUnit3TestAdapter"/>
-    <PackageReference Include="Microsoft.NET.Test.Sdk"  />
-    <PackageReference Include="Moq" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="NUnit" />
+		<PackageReference Include="NUnit3TestAdapter" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" />
+		<PackageReference Include="Moq"  />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\src\DotNetCore.Azure.Configuration.KvCertificates.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\src\DotNetCore.Azure.Configuration.KvCertificates.csproj" />
+	</ItemGroup>
 
 </Project>
