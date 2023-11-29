@@ -1,7 +1,7 @@
 ﻿//   \\      /\  /\\
 //  o \\ \  //\\// \\
 //  |  \//\//       \\
-// Copyright (c) i-Wallsmedia 2022 Alex & Artem Paskhin All rights reserved.
+// Copyright (c) i-Wallsmedia 2021 Alex & Artem Paskhin All rights reserved.
 
 // Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
@@ -14,71 +14,74 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace DotNetCore.Azure.Configuration.KvCertificates
+namespace DotNetCore.Azure.Configuration.KvCertificates;
+
+/// <summary>
+/// Json based Kv Certificate Configuration
+/// container that will be stored in the 
+/// </summary>
+
+[TypeConverter(typeof(KvCertificateConfigContainerConverter))]
+public class KvCertificateConfigContainer
 {
-    /// <summary>
-    /// Json based Kv Certificate Configuration
-    /// container that will be stored in the 
-    /// </summary>
+    [JsonIgnore]
+    private X509Certificate2 _x509Certificate2;
 
-    [TypeConverter(typeof(KvCertificateConfigContainerConverter))]
-    public class KvCertificateConfigContainer
+    [JsonIgnore]
+    public X509Certificate2 X509Certificate2
     {
-        private X509Certificate2 _x509Certificate2;
-
-        [JsonIgnore]
-        public X509Certificate2 X509Certificate2
+        get
         {
-            get
+            if (_x509Certificate2 == null)
             {
-                if (_x509Certificate2 == null)
+                try
                 {
-                    try
+                    if (Pkcs12Base64 != null && PemCertBase64 == null)
                     {
-                        if (Pkcs12Base64 != null && PemCertBase64 == null)
-                        {
-                            byte[] rawData = Convert.FromBase64String(Pkcs12Base64);
-                            _x509Certificate2 = new X509Certificate2(rawData);
-                        }
-                        else if (Pkcs12Base64 != null && PemCertBase64 != null)
-                        {
-                            byte[] cer = Convert.FromBase64String(PemCertBase64);
-                            _x509Certificate2 = PemReader.LoadCertificate(Pkcs12Base64.AsSpan(), cer, allowCertificateOnly: true);
-                        }
+                        byte[] rawData = Convert.FromBase64String(Pkcs12Base64);
+                        _x509Certificate2 = new X509Certificate2(rawData);
                     }
-                    catch { /*Ignore*/                    }
+                    else if (Pkcs12Base64 != null && PemCertBase64 != null)
+                    {
+                        byte[] cer = Convert.FromBase64String(PemCertBase64);
+                         var certificate = PemReader.LoadCertificate(Pkcs12Base64.AsSpan(), cer, allowCertificateOnly: true);
+                        // SSL NetCore PEM support ssl - stream 
+                        string pass = Guid.NewGuid().ToString();
+                        _x509Certificate2 = new X509Certificate2(certificate.Export(X509ContentType.Pfx, pass), pass);
+                    }
                 }
-                return _x509Certificate2;
+                catch { /*Ignore*/ }
             }
+            return _x509Certificate2;
         }
-
-        public string Pkcs12Base64 { get; set; }
-        public string PemCertBase64 { get; set; }
     }
 
-    public class KvCertificateConfigContainerConverter : TypeConverter
+    public string Pkcs12Base64 { get; set; }
+    public string PemCertBase64 { get; set; }
+}
+
+public class KvCertificateConfigContainerConverter : TypeConverter
+{
+    public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
     {
-        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
-        {
-            return sourceType == typeof(string);
-        }
+        return sourceType == typeof(string);
+    }
 
-        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+    public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+    {
+        string str = (string)value;
+        object obj = null;
+        try
         {
-            string str = (string)value;
-            object obj = null;
-            try
+            if(str.StartsWith("?") && str.EndsWith("?") )
             {
-                if(str.StartsWith("?") && str.EndsWith("?") )
-                {
-                    str = $"{{{str.Replace("?", "")}}}";
-                }
-                obj = JsonSerializer.Deserialize(str, typeof(KvCertificateConfigContainer));
+                str = $"{{{str.Replace("?", "")}}}";
             }
-            catch {/* ignore */ }
-            return obj;
-
+            obj = JsonSerializer.Deserialize(str, typeof(KvCertificateConfigContainer));
         }
+        catch {/* ignore */ }
+        return obj;
+
     }
 }
 
