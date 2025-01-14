@@ -55,7 +55,7 @@ public class AzureKvCertificatesConfigurationOptions
     /// Name Encoding Delegate for name conversion 
     /// Default implementation replaces '--' with ':' in the key name.
     /// </summary>
-    public KeyVaultSecretNameEncoder KeyVaultCerficateNameEncoder { get; set; } = KeyVaultSecretNameEncoderDefault;
+    public KeyVaultSecretNameEncoder KeyVaultCertificateNameEncoder { get; set; } = KeyVaultSecretNameEncoderDefault;
 
     /// <summary>
     /// Gets or sets a prefix for configuration section.
@@ -76,12 +76,9 @@ public class AzureKvCertificatesConfigurationOptions
     /// Clients timeout connections - number of repeat times
     /// </summary>
     public int AzureErrorReloadTimes { get; set; } = 12;
-    
+
     /// <summary>
-    /// Clients timeout connections - delay before repiating 
+    /// Clients timeout connections - delay before repeating 
     /// </summary>
     public int AzureErrorReloadDelay { get; set; } = 5;
 }
-
-
-

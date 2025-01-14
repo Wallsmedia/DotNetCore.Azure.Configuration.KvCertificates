@@ -6,13 +6,12 @@
 		<Authors>Wallsmedia Ltd</Authors>
 		<Copyright>Copyright $([System.DateTime]::Now.ToString('yyyy')) © Artem &amp; Alex Paskhin. All rights reserved.</Copyright>
 		<PackageTags>Azure DotNetCore KeyVault Certificates</PackageTags>
-		<Version>8.0.0</Version>
-		<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+		<Version>9.0.0</Version>
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<DotNetCoreAppVersions>net8.0</DotNetCoreAppVersions>
-		<DotNetCoreAppVersionTest>net8.0</DotNetCoreAppVersionTest>
+		<DotNetCoreAppVersions>net9.0</DotNetCoreAppVersions>
+		<DotNetCoreAppVersionTest>net9.0</DotNetCoreAppVersionTest>
 	</PropertyGroup>
 
 	<ItemGroup>

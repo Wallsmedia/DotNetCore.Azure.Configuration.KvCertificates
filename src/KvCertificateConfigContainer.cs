@@ -7,6 +7,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Azure.Core;
+using Microsoft.AspNetCore.Server.Kestrel.Https;
 using System;
 using System.ComponentModel;
 using System.Globalization;
@@ -39,15 +40,15 @@ public class KvCertificateConfigContainer
                     if (Pkcs12Base64 != null && PemCertBase64 == null)
                     {
                         byte[] rawData = Convert.FromBase64String(Pkcs12Base64);
-                        _x509Certificate2 = new X509Certificate2(rawData);
+                        _x509Certificate2 = X509CertificateLoader.LoadPkcs12(rawData, null);
                     }
                     else if (Pkcs12Base64 != null && PemCertBase64 != null)
                     {
                         byte[] cer = Convert.FromBase64String(PemCertBase64);
-                         var certificate = PemReader.LoadCertificate(Pkcs12Base64.AsSpan(), cer, allowCertificateOnly: true);
+                        var certificate = PemReader.LoadCertificate(Pkcs12Base64.AsSpan(), cer, allowCertificateOnly: true);
                         // SSL NetCore PEM support ssl - stream 
-                        string pass = Guid.NewGuid().ToString();
-                        _x509Certificate2 = new X509Certificate2(certificate.Export(X509ContentType.Pfx, pass), pass);
+                        byte[] pkcs12 = certificate.Export(X509ContentType.Pfx);
+                        _x509Certificate2 = X509CertificateLoader.LoadPkcs12(pkcs12, null);
                     }
                 }
                 catch { /*Ignore*/ }
@@ -73,10 +74,6 @@ public class KvCertificateConfigContainerConverter : TypeConverter
         object obj = null;
         try
         {
-            if(str.StartsWith("?") && str.EndsWith("?") )
-            {
-                str = $"{{{str.Replace("?", "")}}}";
-            }
             obj = JsonSerializer.Deserialize(str, typeof(KvCertificateConfigContainer));
         }
         catch {/* ignore */ }

@@ -18,7 +18,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.Azure.Configuration.KvCerfificates.Tests", "test\DotNetCore.Azure.Configuration.KvCerfificates.Tests.csproj", "{85F71B44-A7B0-4926-B75A-09B6FD93C9EF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.Azure.Configuration.KvCertificates.Tests", "test\DotNetCore.Azure.Configuration.KvCertificates.Tests.csproj", "{85F71B44-A7B0-4926-B75A-09B6FD93C9EF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{73D4386D-2525-4EFB-A543-BCE8D7B15DCF}"
 EndProject

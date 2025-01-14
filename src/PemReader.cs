@@ -31,7 +31,7 @@ internal static partial class PemReader
     /// Loads an <see cref="X509Certificate2"/> from PEM data.
     /// </summary>
     /// <param name="data">The PEM data to parse.</param>
-    /// <param name="cer">Optional public certificate data if not defined within the PEM data.</param>
+    /// <param name="certificate">Optional public certificate data if not defined within the PEM data.</param>
     /// <param name="keyType">
     /// Optional <see cref="KeyType"/> of the certificate private key. The default is <see cref="KeyType.Auto"/> to automatically detect.
     /// Only support for <see cref="KeyType.RSA"/> is implemented by shared code.
@@ -39,10 +39,10 @@ internal static partial class PemReader
     /// <param name="allowCertificateOnly">Whether to create an <see cref="X509Certificate2"/> if no private key is read.</param>
     /// <returns>An <see cref="X509Certificate2"/> loaded from the PEM data.</returns>
     /// <exception cref="CryptographicException">A cryptographic exception occurred when trying to create the <see cref="X509Certificate2"/>.</exception>
-    /// <exception cref="InvalidDataException"><paramref name="cer"/> is null and no CERTIFICATE field is defined in PEM, or no PRIVATE KEY is defined in PEM.</exception>
+    /// <exception cref="InvalidDataException"><paramref name="certificate"/> is null and no CERTIFICATE field is defined in PEM, or no PRIVATE KEY is defined in PEM.</exception>
     /// <exception cref="NotSupportedException">The <paramref name="keyType"/> is not supported.</exception>
     /// <exception cref="PlatformNotSupportedException">Creating a <see cref="X509Certificate2"/> from PEM data is not supported on the current platform.</exception>
-    public static X509Certificate2 LoadCertificate(ReadOnlySpan<char> data, byte[] cer = null, KeyType keyType = KeyType.Auto, bool allowCertificateOnly = false)
+    public static X509Certificate2 LoadCertificate(ReadOnlySpan<char> data, byte[] certificate = null, KeyType keyType = KeyType.Auto, bool allowCertificateOnly = false)
     {
         byte[] priv = null;
 
@@ -51,7 +51,7 @@ internal static partial class PemReader
             // TODO: Consider building up a chain to determine the leaf certificate: https://github.com/Azure/azure-sdk-for-net/issues/19043
             if (field.Label.Equals("CERTIFICATE".AsSpan(), StringComparison.Ordinal))
             {
-                cer = field.FromBase64Data();
+                certificate = field.FromBase64Data();
             }
             else if (field.Label.Equals("PRIVATE KEY".AsSpan(), StringComparison.Ordinal))
             {
@@ -67,7 +67,7 @@ internal static partial class PemReader
             data = data.Slice(offset);
         }
 
-        if (cer is null)
+        if (certificate is null)
         {
             throw new InvalidDataException("The certificate is missing the public key");
         }
@@ -76,7 +76,7 @@ internal static partial class PemReader
         {
             if (allowCertificateOnly)
             {
-                return new X509Certificate2(cer);
+                return X509CertificateLoader.LoadCertificate(certificate);
             }
 
             throw new InvalidDataException("The certificate is missing the private key");
@@ -96,24 +96,20 @@ internal static partial class PemReader
 
         if (keyType == KeyType.ECDsa)
         {
-            X509Certificate2 certificate = null;
-            CreateECDsaCertificate(cer, priv, ref certificate);
-
-            return certificate ?? throw new NotSupportedException("Reading an ECDsa certificate from a PEM file is not supported");
+            throw new NotSupportedException("Reading an ECDsa certificate from a PEM file is not supported");
         }
 
-        return CreateRsaCertificate(cer, priv);
+        return CreateRsaCertificate(certificate, priv);
     }
 
-    static partial void CreateECDsaCertificate(byte[] cer, byte[] key, ref X509Certificate2 certificate);
-
-    private static X509Certificate2 CreateRsaCertificate(byte[] cer, byte[] key)
+    private static X509Certificate2 CreateRsaCertificate(byte[] certificate, byte[] key)
     {
         if (!s_rsaInitializedImportPkcs8PrivateKeyMethod)
         {
             // ImportPkcs8PrivateKey was added in .NET Core 3.0 and is only present on Core. We will fall back to a lightweight decoder if this method is missing from the current runtime.
             s_rsaImportPkcs8PrivateKeyMethod = typeof(RSA).GetMethod("ImportPkcs8PrivateKey", BindingFlags.Instance | BindingFlags.Public, null, new[] { typeof(ReadOnlySpan<byte>), typeof(int).MakeByRefType() }, null);
             s_rsaInitializedImportPkcs8PrivateKeyMethod = true;
+
         }
 
         if (s_rsaCopyWithPrivateKeyMethod is null)
@@ -128,7 +124,7 @@ internal static partial class PemReader
             if (s_rsaImportPkcs8PrivateKeyMethod != null)
             {
                 privateKey = RSA.Create();
-
+                                
                 // Because ImportPkcs8PrivateKey declares an out parameter we cannot call it directly using MethodInfo.Invoke since all arguments are passed as an object array.
                 // Instead we create a delegate with the correct signature and invoke it.
                 ImportPrivateKeyDelegate importPkcs8PrivateKey = (ImportPrivateKeyDelegate)s_rsaImportPkcs8PrivateKeyMethod.CreateDelegate(typeof(ImportPrivateKeyDelegate), privateKey);
@@ -144,19 +140,20 @@ internal static partial class PemReader
                 privateKey = LightweightPkcs8Decoder.DecodeRSAPkcs8(key);
             }
 
-            using X509Certificate2 certificateWithoutPrivateKey = new X509Certificate2(cer);
-            X509Certificate2 certificate = (X509Certificate2)s_rsaCopyWithPrivateKeyMethod.Invoke(null, new object[] { certificateWithoutPrivateKey, privateKey });
+            using X509Certificate2 certificateWithoutPrivateKey = X509CertificateLoader.LoadCertificate(certificate);
+
+            X509Certificate2 rsaCertificate = (X509Certificate2)s_rsaCopyWithPrivateKeyMethod.Invoke(null, new object[] { certificateWithoutPrivateKey, privateKey });
 
             // On .NET Framework the PrivateKey member is not initialized after calling CopyWithPrivateKey.
-            if (certificate.GetRSAPrivateKey() is null)
+            if (rsaCertificate.GetRSAPrivateKey() is null)
             {
-                certificate = certificate.CopyWithPrivateKey(privateKey);
+                rsaCertificate = rsaCertificate.CopyWithPrivateKey(privateKey);
             }
 
             // Make sure the private key doesn't get disposed now that it's used.
             privateKey = null;
 
-            return certificate;
+            return rsaCertificate;
         }
         finally
         {

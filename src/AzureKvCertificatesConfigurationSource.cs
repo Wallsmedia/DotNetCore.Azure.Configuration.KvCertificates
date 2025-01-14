@@ -28,6 +28,3 @@ public class AzureKvCertificatesConfigurationSource : IConfigurationSource
         return new AzureKvCertificatesConfigurationProvider(_options);
     }
 }
-
-
-

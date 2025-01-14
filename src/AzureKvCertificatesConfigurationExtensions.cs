@@ -14,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 
 #pragma warning disable AZC0001 // Extension methods have to be in the correct namespace to appear in intellisense.
 namespace DotNetCore.Azure.Configuration.KvCertificates;
+
 #pragma warning restore
 
 
@@ -88,7 +89,7 @@ public static class AzureKvCertificatesConfigurationExtensions
         ArgumentValidation.AssertNotNull(options, nameof(options));
         ArgumentValidation.AssertNotNull(options.VaultUri, $"{nameof(options)}.{nameof(options.VaultUri)}");
         ArgumentValidation.AssertNotNull(options.Credential, $"{nameof(options)}.{nameof(options.Credential)}");
-        ArgumentValidation.AssertNotNull(options.KeyVaultCerficateNameEncoder, $"{nameof(options)}.{nameof(options.KeyVaultCerficateNameEncoder)}");
+        ArgumentValidation.AssertNotNull(options.KeyVaultCertificateNameEncoder, $"{nameof(options)}.{nameof(options.KeyVaultCertificateNameEncoder)}");
         configurationBuilder.Add(new AzureKvCertificatesConfigurationSource(options));
 
         return configurationBuilder;

@@ -47,13 +47,14 @@ public class AzureKvCertificatesConfigurationProvider : ConfigurationProvider, I
     /// <param name="secretClient">The client <see cref="SecretClient"/></param>
     /// <param name="options">The <see cref="AzureKvCertificatesConfigurationOptions"/> to use for configuration options.</param>
     public AzureKvCertificatesConfigurationProvider(CertificateClient certificateClient,
-        SecretClient secretClient, AzureKvCertificatesConfigurationOptions options)
+        SecretClient secretClient,
+        AzureKvCertificatesConfigurationOptions options)
     {
         ArgumentValidation.AssertNotNull(certificateClient, nameof(certificateClient));
         ArgumentValidation.AssertNotNull(secretClient, nameof(secretClient));
         ArgumentValidation.AssertNotNull(options, nameof(options));
         ArgumentValidation.AssertNotNull(options.VaultUri, nameof(options.VaultUri));
-        ArgumentValidation.AssertNotNull(options.KeyVaultCerficateNameEncoder, nameof(options.KeyVaultCerficateNameEncoder));
+        ArgumentValidation.AssertNotNull(options.KeyVaultCertificateNameEncoder, nameof(options.KeyVaultCertificateNameEncoder));
 
         _reloadInterval = options.ReloadInterval;
 
@@ -63,7 +64,7 @@ public class AzureKvCertificatesConfigurationProvider : ConfigurationProvider, I
         _uploadKeyList = options.VaultCertificates != null ? new List<string>(options.VaultCertificates) : new List<string>();
         _uploadAndMapKeys = options.VaultCertificateMap != null ? new Dictionary<string, string>(options.VaultCertificateMap) : new Dictionary<string, string>();
         _configurationSectionPrefix = options.ConfigurationSectionPrefix;
-        _keyVaultSecretNameEncoder = options.KeyVaultCerficateNameEncoder;
+        _keyVaultSecretNameEncoder = options.KeyVaultCertificateNameEncoder;
 
         _fullLoad = _uploadKeyList.Count == 0 && _uploadAndMapKeys.Count == 0;
         _cancellationToken = new CancellationTokenSource();
@@ -80,7 +81,7 @@ public class AzureKvCertificatesConfigurationProvider : ConfigurationProvider, I
         ArgumentValidation.AssertNotNull(options, nameof(options));
         ArgumentValidation.AssertNotNull(options.Credential, nameof(options.Credential));
         ArgumentValidation.AssertNotNull(options.VaultUri, nameof(options.VaultUri));
-        ArgumentValidation.AssertNotNull(options.KeyVaultCerficateNameEncoder, nameof(options.KeyVaultCerficateNameEncoder));
+        ArgumentValidation.AssertNotNull(options.KeyVaultCertificateNameEncoder, nameof(options.KeyVaultCertificateNameEncoder));
 
         _reloadInterval = options.ReloadInterval;
 
@@ -90,7 +91,7 @@ public class AzureKvCertificatesConfigurationProvider : ConfigurationProvider, I
         _uploadKeyList = options.VaultCertificates != null ? new List<string>(options.VaultCertificates) : new List<string>();
         _uploadAndMapKeys = options.VaultCertificateMap != null ? new Dictionary<string, string>(options.VaultCertificateMap) : new Dictionary<string, string>();
         _configurationSectionPrefix = options.ConfigurationSectionPrefix;
-        _keyVaultSecretNameEncoder = options.KeyVaultCerficateNameEncoder;
+        _keyVaultSecretNameEncoder = options.KeyVaultCertificateNameEncoder;
 
         _fullLoad = _uploadKeyList.Count == 0 && _uploadAndMapKeys.Count == 0;
         _cancellationToken = new CancellationTokenSource();
@@ -165,7 +166,7 @@ public class AzureKvCertificatesConfigurationProvider : ConfigurationProvider, I
                 {
                     continue;
                 }
-                VerifyCertficateToload(certificateLoader, newLoadedCertificates, oldLoadedCertificates, certificate);
+                VerifyCertificateToLoad(certificateLoader, newLoadedCertificates, oldLoadedCertificates, certificate);
             }
         }
         else
@@ -177,7 +178,7 @@ public class AzureKvCertificatesConfigurationProvider : ConfigurationProvider, I
                 var certificate = certificateList.OrderByDescending(s => s.UpdatedOn).FirstOrDefault(w => w.Enabled.GetValueOrDefault());
                 if (certificate != null)
                 {
-                    VerifyCertficateToload(certificateLoader, newLoadedCertificates, oldLoadedCertificates, certificate);
+                    VerifyCertificateToLoad(certificateLoader, newLoadedCertificates, oldLoadedCertificates, certificate);
                 }
             }
 
@@ -188,7 +189,7 @@ public class AzureKvCertificatesConfigurationProvider : ConfigurationProvider, I
                 var certificate = certificateList.OrderByDescending(s => s.UpdatedOn).FirstOrDefault(w => w.Enabled.GetValueOrDefault());
                 if (certificate != null)
                 {
-                    VerifyCertficateToload(certificateLoader, newLoadedCertificates, oldLoadedCertificates, certificate);
+                    VerifyCertificateToLoad(certificateLoader, newLoadedCertificates, oldLoadedCertificates, certificate);
                 }
             }
         }
@@ -242,7 +243,7 @@ public class AzureKvCertificatesConfigurationProvider : ConfigurationProvider, I
         }
     }
 
-    private static void VerifyCertficateToload(ParallelCertificateLoader certificateLoader,
+    private static void VerifyCertificateToLoad(ParallelCertificateLoader certificateLoader,
         Dictionary<string, LoadedCertificate> newLoadedCertificates,
         Dictionary<string, LoadedCertificate> oldLoadedCertificates,
         CertificateProperties certificate)
