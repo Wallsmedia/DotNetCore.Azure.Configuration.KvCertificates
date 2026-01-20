@@ -7,7 +7,6 @@
 // See the LICENSE file in the project root for more information.
 
 using Azure.Core;
-using Microsoft.AspNetCore.Server.Kestrel.Https;
 using System;
 using System.ComponentModel;
 using System.Globalization;

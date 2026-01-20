@@ -5,8 +5,8 @@ which package allows storing configuration values using Azure Key Vault Certific
 
 ## Features
 
-- Allows to load certifcates by list and map them into new names.
-- Allows to load  certifcates into the configuration section.
+- Allows to load certificates by list and map them into new names.
+- Allows to load  certificates into the configuration section.
 
 ## Getting started
 
@@ -14,7 +14,7 @@ which package allows storing configuration values using Azure Key Vault Certific
 
 Install the package with [DotNetCore.Azure.Configuration.KvCertificates](https://www.nuget.org/packages/DotNetCore.Azure.Configuration.KvCertificates):
 
-**Version 8.0.x** : **supports only **Microsoft.AspNetCore.App** 8.0
+**Version 10.0.x** : **supports only **Microsoft.AspNetCore.App** 10.0
 
 
 ```Powershell
@@ -32,7 +32,7 @@ To load initialize configuration from Azure Key Vault secrets call the `AddAzure
 
 **Program.cs**
 
-```C# 
+``` CSharp 
       var builder = WebApplication.CreateBuilder(args);
       builder.AddKeyVaultConfigurationProvider();      
 ```
@@ -42,7 +42,7 @@ To load initialize configuration from Azure Key Vault secrets call the `AddAzure
 Used DotNetCore Configuration Templates to inject secrets into Microservice configuration.
 (Add to project nuget package DotNetCore.Configuration.Formatter.)
 
-```C# 
+``` CSharp 
   public static void AddKeyVaultConfigurationProvider(this WebApplicationBuilder builder)
     {
 
@@ -82,10 +82,10 @@ The [Azure Identity library][identity] provides easy Azure Active Directory supp
 Read more about [configuration in ASP.NET Core][aspnetcore_configuration_doc].
 
 
-## Example with DotNetCore Configuration Templates
+## Example with DotNetCore Configuration Formatter
 
 
-Use [DotNetCore Configuration Templates](https://github.com/Wallsmedia/DotNetCore.Configuration.Formatter) 
+Use [DotNetCore Configuration Formatter](https://github.com/Wallsmedia/DotNetCore.Configuration.Formatter) 
 to inject secrets into Microservice configuration.
 
 Add to project nuget package [DotNetCore.Azure.Configuration.KvSecrets](https://www.nuget.org/packages/DotNetCore.Azure.Configuration.KvSecrets).
@@ -155,7 +155,7 @@ public class ApplicationConfiguration
 }
 ```
 
-##### Microservice the Startup.cs
+##### Microservice the StartupExt.cs
 
 
 ``` CSharp
@@ -185,59 +185,40 @@ public class ApplicationConfiguration
 
 **Program.cs**
 
-```C# 
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.ConfigureAppConfiguration(Startup.AddKvCertificatesConfigurations);
-                    webBuilder.UseStartup<Startup>();
-                });
-```
+``` CSharp 
+   var builder = WebApplication.CreateBuilder(args);
+      builder.AddKeyVaultConfigurationProvider();      
+ ```
 
-**Startup.cs**
-
-```C# 
-        public static void AddKvCertificatesConfigurations(WebHostBuilderContext hostingContext, IConfigurationBuilder configurationBuilder)
-        {
-        var configBuilder = new ConfigurationBuilder().AddInMemoryCollection();
-            IHostEnvironment env = hostingContext.HostingEnvironment;
-            configBuilder.AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
-                  .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: false);
-            configBuilder.AddEnvironmentVariables();
-
-            var config = configBuilder.Build();
-
-            var options = configuration.GetSection(nameof(AzureKvCertificatesConfigurationOptions))
-                               .Get<AzureKvCertificatesConfigurationOptions>();
-
-            var credential = new DefaultAzureCredential(
-                new DefaultAzureCredentialOptions()
-                {
-                    ExcludeSharedTokenCacheCredential = true,
-                    ExcludeVisualStudioCodeCredential = true,
-                    ExcludeVisualStudioCredential = true,
-                    ExcludeInteractiveBrowserCredential = true
-                });
-          
-            // Adds Azure Key Valt configuration provider.
-            configurationBuilder.AddAzureKeyVaultCertificates(credential, options);
-
-           var optionsSecrets = configuration.GetSection(nameof(AzureKvConfigurationOptions))
-                               .Get<AzureKvConfigurationOptions>();
-           
-           // Adds Azure Key Valt configuration provider.
-            configurationBuilder.AddAzureKeyVault(credential, options);
-           
-
-```
-
-
-or with **shorthand** 
+**StartupExt.cs**
 
 ``` CSharp
+public static void AddKeyVaultConfigurationProvider(this WebApplicationBuilder builder)
+    {
 
-     var applicationConfig = Configuration.GetTypeNameFormatted<ApplicationConfiguration>();
+        var credential = new DefaultAzureCredential(
+            new DefaultAzureCredentialOptions()
+            {
+                ExcludeSharedTokenCacheCredential = true,
+                ExcludeVisualStudioCodeCredential = true,
+                ExcludeVisualStudioCredential = true,
+                ExcludeInteractiveBrowserCredential = true
+            });
+
+        var optionsCert = builder.Configuration
+                           .GetTypeNameFormatted<AzureKvCertificatesConfigurationOptions>();
+
+        // Adds Azure Key Valt configuration provider.
+        builder.Configuration.AddAzureKeyVaultCertificates(credential, optionsCert);
+
+        var optionsSecrets = builder.Configuration
+                           .GetTypeNameFormatted<AzureKvConfigurationOptions>()
+
+           
+           // Adds Azure Key Valt configuration provider.
+            builder.Configuration.AddAzureKeyVault(credential, options);
+    }
+
 
 ```
 

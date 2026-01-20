@@ -7,9 +7,9 @@
 // See the LICENSE file in the project root for more information.
 
 
-using System;
 using Azure.Core;
 using Microsoft.Extensions.Configuration;
+using System;
 
 
 #pragma warning disable AZC0001 // Extension methods have to be in the correct namespace to appear in intellisense.

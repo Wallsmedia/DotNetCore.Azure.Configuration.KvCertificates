@@ -6,12 +6,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
 
+using Azure.Security.KeyVault.Certificates;
+using Azure.Security.KeyVault.Secrets;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Azure.Security.KeyVault.Certificates;
-using Azure.Security.KeyVault.Secrets;
 
 namespace DotNetCore.Azure.Configuration.KvCertificates;
 

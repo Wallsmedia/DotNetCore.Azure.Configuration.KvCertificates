@@ -6,11 +6,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Azure.Security.KeyVault.Certificates;
 using Azure.Security.KeyVault.Secrets;
 using DotNetCore.Azure.Configuration.KvCertificates.Tests.Helpers;
@@ -18,6 +13,11 @@ using Microsoft.Extensions.Primitives;
 using Moq;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace DotNetCore.Azure.Configuration.KvCertificates.Tests;
 

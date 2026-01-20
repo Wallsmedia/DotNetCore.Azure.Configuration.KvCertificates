@@ -6,10 +6,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections.Generic;
 using Azure.Core;
 using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
 
 namespace DotNetCore.Azure.Configuration.KvCertificates;
 
